@@ -19,6 +19,7 @@
   "scripts": {
     "clean": "rimraf build tmp",
     "build": "tsc -p tsconfig.release.json",
+    "build:doc": "typedoc --ignoreCompilerErrors --tsconfig \"tsconfig.json\" --mode modules --out doc/ src/",
     "watch": "tsc -w -p tsconfig.release.json",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
     "test": "npm run lint && npm run test:only",
@@ -45,6 +46,7 @@
     "tslint": "~5.9.1",
     "tslint-microsoft-contrib": "^5.0.3",
     "tsutils": "~2.21.0",
+    "typedoc": "^0.10.0",
     "typescript": "~2.7.1"
   }
 }

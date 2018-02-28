@@ -15,15 +15,32 @@ export enum WatcherEvent {
   DELETE = 'delete',
 }
 
+/**
+ * Service that watch a directory on a file system and notifies file additions, changes and deletions.
+ */
 export class Watcher extends EventEmitter {
 
+  /**
+   * Path of the watched directory.
+   */
   public path: string
+
+  /**
+   * A Watchman query to filter the files being watched.
+   */
   public query: watchman.Query
 
   private client: Client
   private subscription: Subscription
   private watchmanBinaryPath?: string
 
+  /**
+   * Initiates a watch on a directory.
+   *
+   * @param path - Path of the watched directory.
+   * @param query - A Watchman query to filter the files being watched.
+   * @param watchmanBinaryPath - Path to the Watchman binary.
+   */
   constructor(path: string, query?: watchman.Query, watchmanBinaryPath?: string) {
     super()
 
@@ -32,11 +49,17 @@ export class Watcher extends EventEmitter {
 
     this.watchmanBinaryPath = watchmanBinaryPath
 
+    // tslint:disable-next-line:no-floating-promises
     this.initiateWatch()
 
     return this
   }
 
+  /**
+   * Closes the watcher.
+   *
+   * @returns Close operation.
+   */
   public async close(): Promise<void> {
     try {
       await this.subscription.unsubscribe()

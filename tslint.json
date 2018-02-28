@@ -26,12 +26,6 @@
         "singleline": "never"
       }
     ],
-    "typedef": [
-      true,
-      "parameter",
-      "arrow-parameter",
-      "property-declaration",
-      "member-variable-declaration"
-    ]
+    "typedef": false
   }
 }

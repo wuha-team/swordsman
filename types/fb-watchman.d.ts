@@ -1,5 +1,7 @@
 declare module 'fb-watchman' {
 
+  import { EventEmitter } from 'events'
+
   type Capability =
     'scm-hg' |
     'cmd-debug-fsevents-inject-drop' |
@@ -271,6 +273,10 @@ declare module 'fb-watchman' {
   // Clock
   export type ClockArguments = [ 'clock', string ] | [ 'clock', string, { sync_timeout: boolean } ]
 
+  interface ClockResponse extends CommandResponse {
+    clock: string
+  }
+
   // Find
   export type FindArguments = [ 'find', string ] | [ 'find', string, string | string[] ]
 
@@ -350,9 +356,9 @@ declare module 'fb-watchman' {
   export interface SubscriptionEvent {
     version: string
     clock: string
-    files: File[]
     root: string
     subscription: string
+    files: File[]
   }
 
   // Unsubscribe
@@ -389,15 +395,24 @@ declare module 'fb-watchman' {
 
   interface WatchProjectResponse extends CommandResponse {
     watch: string
-    relative_path: string
+    relative_path?: string
   }
 
   type commandCallback<T extends CommandResponse> = (error: Error, response: T) => void
 
-  export class Client {
+  interface ClientOptions {
+    watchmanBinaryPath?: string
+  }
+
+  export class Client extends EventEmitter {
+
+    public watchmanBinaryPath?: string
+
+    public constructor(options?: ClientOptions)
 
     public capabilityCheck(options: VersionOptions, callback: commandCallback<VersionResponse>): void
 
+    public command(args: ClockArguments, callback?: commandCallback<ClockResponse>): void
     public command(args: QueryArguments, callback?: commandCallback<QueryResponse>): void
     public command(args: SubscribeArguments, callback?: commandCallback<SubscribeResponse>): void
     public command(args: VersionArguments, callback?: commandCallback<VersionResponse>): void

@@ -50,13 +50,11 @@ describe('client', () => {
 
     describe('subscribe', () => {
 
-      it('should call clock and subscribe command, set subscriptionName and call subscriptionAdded on client', async () => {
+      it('should call clock and subscribe command and call subscriptionAdded on client', async () => {
         await this.subscription.watch()
         await this.subscription.subscribe()
 
         expect(this.clientInstance.command.callCount).to.equal(3)
-
-        expect(this.subscription.subscriptionName).to.not.be.undefined
 
         // Clock
         expect(this.clientInstance.command.args[1][0]).to.deep.equal([

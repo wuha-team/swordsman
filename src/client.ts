@@ -11,18 +11,19 @@ export class Subscription {
 
   constructor(client: Client, path: string) {
     this.root = path
+    this.subscriptionName = uuid()
 
     this.client = client
   }
 
   public watch(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       this.client.command([ 'watch-project', this.root ], (error, response) => {
         if (error) {
           reject(error)
         } else {
           this.root = response.watch
-          this.relativePath = response.relative_path ? response.relative_path : this.root
+          this.relativePath = response.relative_path ? response.relative_path : ''
           resolve()
         }
       })
@@ -35,8 +36,6 @@ export class Subscription {
         if (clockErr) {
           reject(clockErr)
         } else {
-
-          this.subscriptionName = uuid()
 
           this.client.command(
             [

@@ -47,11 +47,15 @@ export class Watcher extends EventEmitter {
 
   private async initiateWatch(): Promise<void> {
     try {
-      await this.createSubscription()
+      this.createSubscription()
 
+      // Attach listeners before launching subscription
+      // So that we do not miss any event
       this.attachEndListener()
       this.attachErrorListener()
       this.attachSubscriptionListener()
+
+      await this.launchSubscription()
 
       this.emit(WatcherEvent.READY)
     } catch (error) {
@@ -59,45 +63,54 @@ export class Watcher extends EventEmitter {
     }
   }
 
-  private async createSubscription(): Promise<void> {
+  private createSubscription(): void {
     this.client = getClientInstance(this.watchmanBinaryPath)
     this.subscription = new Subscription(this.client, this.path)
+  }
 
+  private async launchSubscription(): Promise<void> {
     await this.subscription.watch()
     await this.subscription.subscribe()
   }
 
   private attachEndListener(): void {
     // Watchman has ended connection unilaterally, try to reconnect
-    this.client.on('end', async () => {
+    const endCallback = async () => {
       try {
-        await this.createSubscription()
+        this.createSubscription()
+
+        // Don't attach listeners again
+
+        await this.launchSubscription()
       } catch (error) {
         this.handleError(error)
       }
-    })
+    }
+    this.client.on('end', endCallback.bind(this))
   }
 
   private attachErrorListener(): void {
-    this.client.on('error', (error: Error) => {
+    const errorCallback = (error: Error) => {
       this.handleError(error)
-    })
+    }
+    this.client.on('error', errorCallback.bind(this))
   }
 
   private attachSubscriptionListener(): void {
-    this.client.on('subscription', (event: watchman.SubscriptionEvent) => {
+    const subscriptionCallback = (event: watchman.SubscriptionEvent) => {
       if (event.subscription !== this.subscription.subscriptionName) {
         return
       }
 
       if (Array.isArray(event.files)) {
-        event.files.forEach(this.handleFileChange)
+        event.files.forEach(this.handleFileChange.bind(this))
       }
-    })
+    }
+    this.client.on('subscription', subscriptionCallback.bind(this))
   }
 
   private handleFileChange(file: watchman.File): void {
-    const absolutePath = join(this.subscription.root, file.name)
+    const absolutePath = join(this.subscription.root, this.subscription.relativePath, file.name)
 
     if (!file.exists) {
       this.emitFileEvent(WatcherEvent.DELETE, absolutePath)

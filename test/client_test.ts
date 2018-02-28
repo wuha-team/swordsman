@@ -2,6 +2,7 @@
 import { expect } from 'chai'
 import * as watchman from 'fb-watchman'
 import * as fs from 'fs'
+import * as path from 'path'
 import { createSandbox } from 'sinon'
 import * as tmp from 'tmp'
 
@@ -14,7 +15,7 @@ describe('client', () => {
     beforeEach('create sandbox, create a temporary directory and instantiate a Client and Subscription classes', () => {
       this.sandbox = createSandbox()
 
-      const dir = tmp.dirSync({ prefix: 'swordsman-test', unsafeCleanup: true })
+      const dir = tmp.dirSync({ dir: __dirname, prefix: 'swordsman-test', unsafeCleanup: true })
       this.dirPath = fs.realpathSync(dir.name)
 
       this.clientInstance = new client.Client()
@@ -42,8 +43,10 @@ describe('client', () => {
           this.dirPath,
         ])
 
-        expect(this.subscription.root).to.equal(this.dirPath)
+        expect(this.subscription.root).to.not.be.undefined
         expect(this.subscription.relativePath).to.not.be.undefined
+
+        expect(path.join(this.subscription.root, this.subscription.relativePath)).to.equal(this.dirPath)
       })
 
     })
@@ -59,7 +62,7 @@ describe('client', () => {
         // Clock
         expect(this.clientInstance.command.args[1][0]).to.deep.equal([
           'clock',
-          this.dirPath,
+          this.subscription.root,
         ])
 
         // Subscribe

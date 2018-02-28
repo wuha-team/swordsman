@@ -1,9 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "declaration": false,
+    "declaration": true,
     "rootDir": ".",
-    "outDir": "build",
+    "outDir": "dist",
     "removeComments": true,
     "jsx": "react"
   },

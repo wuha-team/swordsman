@@ -16,8 +16,10 @@
   "engines": {
     "node": ">= 8.9.0"
   },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "clean": "rimraf build tmp",
+    "clean": "rimraf dist tmp doc",
     "build": "tsc -p tsconfig.release.json",
     "build:doc": "typedoc --ignoreCompilerErrors --tsconfig \"tsconfig.json\" --mode modules --out doc/ src/",
     "watch": "tsc -w -p tsconfig.release.json",

@@ -1,6 +1,6 @@
 {
   "name": "swordsman",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Sharp file watch interface for Facebook Watchman",
   "author": "François Voron",
   "license": "MIT",

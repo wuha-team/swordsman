@@ -1,8 +1,11 @@
 /* tslint:disable: no-unused-expression no-invalid-this */
 import { expect } from 'chai'
+import * as watchman from 'fb-watchman'
 import * as fs from 'fs'
 import { createSandbox } from 'sinon'
 import * as tmp from 'tmp'
+
+import { createWatcher } from './_factories/_watcher'
 
 import * as client from '../src/client'
 import * as watcher from '../src/watcher'
@@ -19,15 +22,9 @@ describe('watcher', () => {
       const dir = tmp.dirSync({ dir: __dirname, prefix: 'swordsman-test', unsafeCleanup: true })
       this.dirPath = fs.realpathSync(dir.name)
 
-      this.watcher = new watcher.Watcher(this.dirPath)
+      this.existingFile = tmp.fileSync({ dir: this.dirPath })
 
-      // Wait for the watcher to be ready
-      await new Promise((resolve) => {
-        this.watcher.on(watcher.WatcherEvent.READY, resolve)
-        this.watcher.on(watcher.WatcherEvent.ERROR, (error) => {
-          console.error(error)
-        })
-      })
+      this.watcher = await createWatcher(this.dirPath)
     })
 
     after('close watcher', async () => {
@@ -98,11 +95,7 @@ describe('watcher', () => {
       this.sandbox.spy(client.Subscription.prototype, 'subscribe')
 
       const customQuery: watchman.Query = { expression: ['type', 'f'] }
-      const watcherCustomQuery = new watcher.Watcher(this.dirPath, { expression: ['type', 'f'] })
-
-      await new Promise((resolve) => {
-        watcherCustomQuery.on(watcher.WatcherEvent.READY, resolve)
-      })
+      const watcherCustomQuery = await createWatcher(this.dirPath, customQuery)
 
       expect(watcherCustomQuery.subscription.subscribe.args[0][0]).to.deep.equal(customQuery)
 
@@ -112,11 +105,13 @@ describe('watcher', () => {
     describe('close', () => {
 
       it('should call unsubscribe on subscription', async () => {
-        this.sandbox.spy(this.watcher.subscription, 'unsubscribe')
+        const watcherInstance = await createWatcher(this.dirPath)
 
-        await this.watcher.close()
+        this.sandbox.spy(watcherInstance.subscription, 'unsubscribe')
 
-        expect(this.watcher.subscription.unsubscribe.called).to.be.true
+        await watcherInstance.close()
+
+        expect(watcherInstance.subscription.unsubscribe.called).to.be.true
       })
 
     })

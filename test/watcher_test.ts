@@ -4,6 +4,7 @@ import * as fs from 'fs'
 import { createSandbox } from 'sinon'
 import * as tmp from 'tmp'
 
+import * as client from '../src/client'
 import * as watcher from '../src/watcher'
 
 tmp.setGracefulCleanup()
@@ -91,6 +92,21 @@ describe('watcher', () => {
       })
 
       const tmpFile = tmp.fileSync({ dir: this.dirPath })
+    })
+
+    it('should call subscribe with custom query if provided', async () => {
+      this.sandbox.spy(client.Subscription.prototype, 'subscribe')
+
+      const customQuery: watchman.Query = { expression: ['type', 'f'] }
+      const watcherCustomQuery = new watcher.Watcher(this.dirPath, { expression: ['type', 'f'] })
+
+      await new Promise((resolve) => {
+        watcherCustomQuery.on(watcher.WatcherEvent.READY, resolve)
+      })
+
+      expect(watcherCustomQuery.subscription.subscribe.args[0][0]).to.deep.equal(customQuery)
+
+      await watcherCustomQuery.close()
     })
 
     describe('close', () => {

@@ -75,6 +75,25 @@ describe('client', () => {
         expect(this.clientInstance.subscriptionAdded.called).to.be.true
       })
 
+      it('should call subscribe command with custom query if provided', async () => {
+        await this.subscription.watch()
+
+        const customQuery: watchman.Query = { expression: ['type', 'f'] }
+        await this.subscription.subscribe(customQuery)
+
+        expect(this.clientInstance.command.callCount).to.equal(3)
+
+        // Subscribe
+        expect(this.clientInstance.command.args[2][0][0]).to.equal('subscribe')
+        expect(this.clientInstance.command.args[2][0][1]).to.equal(this.subscription.root)
+        expect(this.clientInstance.command.args[2][0][2]).to.equal(this.subscription.subscriptionName)
+        expect(this.clientInstance.command.args[2][0][3].relative_root).to.equal(this.subscription.relativePath)
+        expect(this.clientInstance.command.args[2][0][3]).to.have.property('since')
+        expect(this.clientInstance.command.args[2][0][3]).to.have.property('expression')
+
+        expect(this.clientInstance.subscriptionAdded.called).to.be.true
+      })
+
     })
 
     describe('unsubscribe', () => {

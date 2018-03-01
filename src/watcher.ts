@@ -93,7 +93,7 @@ export class Watcher extends EventEmitter {
 
   private async launchSubscription(): Promise<void> {
     await this.subscription.watch()
-    await this.subscription.subscribe()
+    await this.subscription.subscribe(this.query)
   }
 
   private attachEndListener(): void {

@@ -95,13 +95,13 @@ export class Watcher extends EventEmitter {
 
       await this.launchSubscription()
 
-      this.emit(WatcherEvent.READY)
-
       // If option enabled, ask Watchman to perform the query
       // immediately so that existing files are reported
       if (this.options.reportExistingFiles) {
         await this.subscription.runQuery()
       }
+
+      this.emit(WatcherEvent.READY)
     } catch (error) {
       this.handleError(error)
     }

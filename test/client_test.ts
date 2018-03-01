@@ -8,6 +8,8 @@ import * as tmp from 'tmp'
 
 import * as client from '../src/client'
 
+tmp.setGracefulCleanup()
+
 describe('client', () => {
 
   describe('Subscription class', () => {
@@ -76,18 +78,19 @@ describe('client', () => {
       })
 
       it('should call subscribe command with custom query if provided', async () => {
-        await this.subscription.watch()
-
         const customQuery: watchman.Query = { expression: ['type', 'f'] }
-        await this.subscription.subscribe(customQuery)
+        const subscription = new client.Subscription(this.clientInstance, this.dirPath, customQuery)
+
+        await subscription.watch()
+        await subscription.subscribe()
 
         expect(this.clientInstance.command.callCount).to.equal(3)
 
         // Subscribe
         expect(this.clientInstance.command.args[2][0][0]).to.equal('subscribe')
-        expect(this.clientInstance.command.args[2][0][1]).to.equal(this.subscription.root)
-        expect(this.clientInstance.command.args[2][0][2]).to.equal(this.subscription.subscriptionName)
-        expect(this.clientInstance.command.args[2][0][3].relative_root).to.equal(this.subscription.relativePath)
+        expect(this.clientInstance.command.args[2][0][1]).to.equal(subscription.root)
+        expect(this.clientInstance.command.args[2][0][2]).to.equal(subscription.subscriptionName)
+        expect(this.clientInstance.command.args[2][0][3].relative_root).to.equal(subscription.relativePath)
         expect(this.clientInstance.command.args[2][0][3]).to.have.property('since')
         expect(this.clientInstance.command.args[2][0][3]).to.have.property('expression')
 

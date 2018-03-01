@@ -21,6 +21,11 @@ export class Subscription {
    */
   public subscriptionName: string
 
+  /**
+   * A Watchman query to filter the files being watched.
+   */
+  public query?: watchman.Query
+
   private client: Client
 
   /**
@@ -29,8 +34,9 @@ export class Subscription {
    * @param client - Watchman client instance.
    * @param path - Path to the watched directory.
    */
-  constructor(client: Client, path: string) {
+  constructor(client: Client, path: string, query?: watchman.Query) {
     this.root = path
+    this.query = query
     this.subscriptionName = uuid()
 
     this.client = client
@@ -60,7 +66,7 @@ export class Subscription {
    *
    * @returns Subscription operation.
    */
-  public subscribe(query?: watchman.Query): Promise<void> {
+  public subscribe(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.client.command([ 'clock', this.root ], (clockErr, clockResponse) => {
         if (clockErr) {
@@ -72,7 +78,7 @@ export class Subscription {
               'subscribe',
               this.root,
               this.subscriptionName,
-              this.getSubscriptionQuery(clockResponse.clock, query),
+              this.getSubscriptionQuery(clockResponse.clock),
             ],
             (subscribeErr) => {
               if (subscribeErr) {
@@ -83,6 +89,31 @@ export class Subscription {
               }
             },
           )
+        }
+      })
+    })
+  }
+
+  /**
+   * Runs a query on this subscription and send an event for the existing files.
+   *
+   * @returns Query operation
+   */
+  public runQuery(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.client.command([ 'query', this.root, this.getSubscriptionQuery() ], (error, response) => {
+        if (error) {
+          reject(error)
+        } else {
+          const subscriptionEvent: watchman.SubscriptionEvent = {
+            root: this.root,
+            subscription: this.subscriptionName,
+            version: response.version,
+            clock: response.clock,
+            files: response.files,
+          }
+          this.client.emit('subscription', subscriptionEvent)
+          resolve()
         }
       })
     })
@@ -106,8 +137,12 @@ export class Subscription {
     })
   }
 
-  private getSubscriptionQuery(clock: string, query?: watchman.Query): watchman.Query {
-    return { since: clock, relative_root: this.relativePath, ...query }
+  private getSubscriptionQuery(clock?: string): watchman.Query {
+    return {
+      relative_root: this.relativePath,
+      ...clock ? { since: clock } : {},
+      ...this.query,
+    }
   }
 
 }

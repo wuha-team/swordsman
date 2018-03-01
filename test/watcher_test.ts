@@ -35,6 +35,21 @@ describe('watcher', () => {
       this.sandbox.restore()
     })
 
+    it('should emit ADD event on existing files if option enabled', async () => {
+      const watcherExistingEnabled = await createWatcher(this.dirPath, null, { reportExistingFiles: true })
+
+      await new Promise((resolve) => {
+        watcherExistingEnabled.once(watcher.WatcherEvent.ADD, (path: string, stats: fs.Stats) => {
+          expect(path).to.equal(this.existingFile.name)
+          expect(stats).to.be.instanceof(fs.Stats)
+
+          resolve()
+        })
+      })
+
+      await watcherExistingEnabled.close()
+    })
+
     it('should emit ADD event when file added', (done) => {
       this.watcher.once(watcher.WatcherEvent.ADD, (path: string, stats: fs.Stats) => {
         expect(path).to.equal(tmpFile.name)
@@ -91,13 +106,11 @@ describe('watcher', () => {
       const tmpFile = tmp.fileSync({ dir: this.dirPath })
     })
 
-    it('should call subscribe with custom query if provided', async () => {
-      this.sandbox.spy(client.Subscription.prototype, 'subscribe')
-
+    it('should creation subscription with custom query if provided', async () => {
       const customQuery: watchman.Query = { expression: ['type', 'f'] }
       const watcherCustomQuery = await createWatcher(this.dirPath, customQuery)
 
-      expect(watcherCustomQuery.subscription.subscribe.args[0][0]).to.deep.equal(customQuery)
+      expect(watcherCustomQuery.subscription.query).to.deep.equal(customQuery)
 
       await watcherCustomQuery.close()
     })

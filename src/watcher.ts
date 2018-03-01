@@ -16,6 +16,21 @@ export enum WatcherEvent {
 }
 
 /**
+ * Options available to customize Watcher behaviour.
+ */
+export interface WatcherOptions {
+  /**
+   * Path to the Watchman binary.
+   */
+  watchmanBinaryPath?: string,
+
+  /**
+   * Whether to send an ADD event for existing files on watch initialization.
+   */
+  reportExistingFiles?: boolean
+}
+
+/**
  * Service that watch a directory on a file system and notifies file additions, changes and deletions.
  */
 export class Watcher extends EventEmitter {
@@ -32,22 +47,22 @@ export class Watcher extends EventEmitter {
 
   private client: Client
   private subscription: Subscription
-  private watchmanBinaryPath?: string
+  private options: WatcherOptions
 
   /**
    * Initiates a watch on a directory.
    *
    * @param path - Path of the watched directory.
    * @param query - A Watchman query to filter the files being watched.
-   * @param watchmanBinaryPath - Path to the Watchman binary.
+   * @param options - Options available to customize Watcher behaviour.
    */
-  constructor(path: string, query?: watchman.Query, watchmanBinaryPath?: string) {
+  constructor(path: string, query?: watchman.Query, options?: WatcherOptions) {
     super()
 
     this.path = path
     this.query = query
 
-    this.watchmanBinaryPath = watchmanBinaryPath
+    this.options = { reportExistingFiles: false, ...options }
 
     // tslint:disable-next-line:no-floating-promises
     this.initiateWatch()
@@ -81,19 +96,25 @@ export class Watcher extends EventEmitter {
       await this.launchSubscription()
 
       this.emit(WatcherEvent.READY)
+
+      // If option enabled, ask Watchman to perform the query
+      // immediately so that existing files are reported
+      if (this.options.reportExistingFiles) {
+        await this.subscription.runQuery()
+      }
     } catch (error) {
       this.handleError(error)
     }
   }
 
   private createSubscription(): void {
-    this.client = getClientInstance(this.watchmanBinaryPath)
-    this.subscription = new Subscription(this.client, this.path)
+    this.client = getClientInstance(this.options.watchmanBinaryPath)
+    this.subscription = new Subscription(this.client, this.path, this.query)
   }
 
   private async launchSubscription(): Promise<void> {
     await this.subscription.watch()
-    await this.subscription.subscribe(this.query)
+    await this.subscription.subscribe()
   }
 
   private attachEndListener(): void {

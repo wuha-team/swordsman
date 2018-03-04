@@ -1,6 +1,7 @@
 # Swordsman ⚔️
 
-[![Build Status](https://travis-ci.org/frankie567/swordsman.svg?branch=master)](https://travis-ci.org/frankie567/swordsman) [![Coverage Status](https://coveralls.io/repos/github/frankie567/swordsman/badge.svg?branch=master)](https://coveralls.io/github/frankie567/swordsman?branch=master)
+[![Build Status](https://travis-ci.org/frankie567/swordsman.svg?branch=master)](https://travis-ci.org/frankie567/swordsman) [![Coverage Status](https://coveralls.io/repos/github/frankie567/swordsman/badge.svg?branch=master)](https://coveralls.io/github/frankie567/swordsman?branch=master) 
+[![npm](https://img.shields.io/npm/dt/swordsman.svg)](https://www.npmjs.com/package/swordsman)
 
 Swordsman is a file watch interface for [Facebook Watchman](https://github.com/facebook/watchman). The goal is to provide an easy to use API to leverage all the power of Watchman in NodeJS. It is heavily inspired by [sane](https://github.com/amasad/sane), but focused exclusively on Watchman.
 
@@ -46,4 +47,4 @@ const watcher = new sworsdman.Watcher(
 You can provide `options` object as a third parameter to the `swordsman.Watcher` constructor.
 
 * `watchmanBinaryPath` (`string`): Path to the Watchman binary.
-* `reportExistingFiles` (`bool`, default `false`): Whether to send an ADD event for existing files on watch initialization.
+* `reportExistingFiles` (`boolean`, default `false`): Whether to send an ADD event for existing files on watch initialization.

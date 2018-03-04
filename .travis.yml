@@ -16,6 +16,7 @@ before_install:
   - ./configure 
   - make
   - sudo make install
+  - cd ..
 
 after_success:
   - npm run coverage

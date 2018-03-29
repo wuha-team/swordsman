@@ -58,13 +58,17 @@ export class Subscription {
    */
   public check(): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
-      this.client.capabilityCheck({ optional: [], required: requiredCapabilities }, (error) => {
-        if (error) {
-          reject(error)
-        } else {
-          resolve()
-        }
-      })
+      try {
+        this.client.capabilityCheck({ optional: [], required: requiredCapabilities }, (error) => {
+          if (error) {
+            reject(error)
+          } else {
+            resolve()
+          }
+        })
+      } catch (error) {
+        reject(error)
+      }
     })
   }
 

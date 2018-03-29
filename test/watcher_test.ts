@@ -106,9 +106,20 @@ describe('watcher', () => {
       const tmpFile = tmp.fileSync({ dir: this.dirPath })
     })
 
-    it('should emit ERROR at initialiation if Watchman not available', () => {
+    it('should emit ERROR at initialiation if capabilityCheck returns an error', () => {
       this.sandbox.stub(client, 'getClientInstance').returns({
         capabilityCheck: this.sandbox.stub().callsFake((_options, callback) => callback('error')),
+        on: this.sandbox.stub(),
+      })
+
+      // Our test watcher factory abstracts the initialization with a promise
+      // So check for the promise rejection is equivalent to have an error event emitted
+      expect(createWatcher(this.dirPath)).to.eventually.be.rejected
+    })
+
+    it('should emit ERROR at initialiation if capabilityCheck rejects', () => {
+      this.sandbox.stub(client, 'getClientInstance').returns({
+        capabilityCheck: this.sandbox.stub().rejects(),
         on: this.sandbox.stub(),
       })
 

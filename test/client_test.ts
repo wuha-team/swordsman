@@ -1,4 +1,4 @@
-/* tslint:disable: no-unused-expression no-invalid-this */
+/* tslint:disable: no-unused-expression no-invalid-this variable-name */
 import { expect } from 'chai'
 import * as watchman from 'fb-watchman'
 import * as fs from 'fs'
@@ -23,6 +23,8 @@ describe('client', () => {
       this.clientInstance = new client.Client()
       this.subscription = new client.Subscription(this.clientInstance, this.dirPath)
 
+      this.sandbox.stub(this.clientInstance, 'capabilityCheck')
+
       this.sandbox.spy(this.clientInstance, 'command')
       this.sandbox.spy(this.clientInstance, 'subscriptionAdded')
       this.sandbox.spy(this.clientInstance, 'subscriptionDeleted')
@@ -32,6 +34,24 @@ describe('client', () => {
       this.sandbox.restore()
 
       this.clientInstance.end()
+    })
+
+    describe('check', () => {
+
+      it('should call capabilityCheck and resolves if everything okay', async () => {
+        this.clientInstance.capabilityCheck.callsFake((_options, callback) => callback())
+
+        expect(this.subscription.check()).to.eventually.be.fulfilled
+        expect(this.clientInstance.capabilityCheck.called).to.be.true
+      })
+
+      it('should call capabilityCheck and rejects if there is an error', async () => {
+        this.clientInstance.capabilityCheck.callsFake((_options, callback) => callback('error'))
+
+        expect(this.subscription.check()).to.eventually.be.rejected
+        expect(this.clientInstance.capabilityCheck.called).to.be.true
+      })
+
     })
 
     describe('watch', () => {

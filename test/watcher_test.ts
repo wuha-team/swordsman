@@ -1,4 +1,4 @@
-/* tslint:disable: no-unused-expression no-invalid-this */
+/* tslint:disable: no-unused-expression no-invalid-this variable-name */
 import { expect } from 'chai'
 import * as watchman from 'fb-watchman'
 import * as fs from 'fs'
@@ -104,6 +104,17 @@ describe('watcher', () => {
       })
 
       const tmpFile = tmp.fileSync({ dir: this.dirPath })
+    })
+
+    it('should emit ERROR at initialiation if Watchman not available', () => {
+      this.sandbox.stub(client, 'getClientInstance').returns({
+        capabilityCheck: this.sandbox.stub().callsFake((_options, callback) => callback('error')),
+        on: this.sandbox.stub(),
+      })
+
+      // Our test watcher factory abstracts the initialization with a promise
+      // So check for the promise rejection is equivalent to have an error event emitted
+      expect(createWatcher(this.dirPath)).to.eventually.be.rejected
     })
 
     it('should creation subscription with custom query if provided', async () => {

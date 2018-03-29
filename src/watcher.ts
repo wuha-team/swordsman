@@ -89,8 +89,8 @@ export class Watcher extends EventEmitter {
 
       // Attach listeners before launching subscription
       // So that we do not miss any event
-      this.attachEndListener()
       this.attachErrorListener()
+      this.attachEndListener()
       this.attachSubscriptionListener()
 
       await this.launchSubscription()
@@ -113,6 +113,7 @@ export class Watcher extends EventEmitter {
   }
 
   private async launchSubscription(): Promise<void> {
+    await this.subscription.check()
     await this.subscription.watch()
     await this.subscription.subscribe()
   }

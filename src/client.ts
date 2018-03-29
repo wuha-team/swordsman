@@ -1,6 +1,15 @@
 import * as watchman from 'fb-watchman'
 import { v1 as uuid } from 'uuid'
 
+const requiredCapabilities: watchman.Capability[] = [
+  'cmd-clock',
+  'cmd-subscribe',
+  'cmd-query',
+  'cmd-unsubscribe',
+  'cmd-watch-project',
+  'relative_root',
+]
+
 /**
  * Represents a Watchman subscription
  */
@@ -40,6 +49,23 @@ export class Subscription {
     this.subscriptionName = uuid()
 
     this.client = client
+  }
+
+  /**
+   * Makes a capability check on Watchman to be sure that it's available.
+   *
+   * @returns Capability check operation.
+   */
+  public check(): Promise<void> {
+    return new Promise<void>(async (resolve, reject) => {
+      this.client.capabilityCheck({ optional: [], required: requiredCapabilities }, (error) => {
+        if (error) {
+          reject(error)
+        } else {
+          resolve()
+        }
+      })
+    })
   }
 
   /**

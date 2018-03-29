@@ -5,10 +5,10 @@ export const createWatcher = async (path: string, query?: watchman.Query, option
   const watcherInstance = new watcher.Watcher(path, query, options)
 
   // Wait for the watcher to be ready
-  await new Promise((resolve) => {
+  await new Promise((resolve, reject) => {
     watcherInstance.on(watcher.WatcherEvent.READY, resolve)
     watcherInstance.on(watcher.WatcherEvent.ERROR, (error) => {
-      console.error(error)
+      reject(error)
     })
   })
 

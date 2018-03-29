@@ -119,7 +119,7 @@ describe('watcher', () => {
 
     it('should emit ERROR at initialiation if capabilityCheck rejects', () => {
       this.sandbox.stub(client, 'getClientInstance').returns({
-        capabilityCheck: this.sandbox.stub().rejects(),
+        capabilityCheck: this.sandbox.stub().throws(),
         on: this.sandbox.stub(),
       })
 

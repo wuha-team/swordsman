@@ -104,6 +104,9 @@ export class Watcher extends EventEmitter {
       this.emit(WatcherEvent.READY)
     } catch (error) {
       this.handleError(error)
+      if (this.client) {
+        this.client.close()
+      }
     }
   }
 

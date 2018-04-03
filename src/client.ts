@@ -192,7 +192,7 @@ export class Client extends watchman.Client {
   public subscriptionsCount: number = 0
 
   /**
-   * Increments the subscription count
+   * Increments the subscription count.
    */
   public subscriptionAdded(): void {
     this.subscriptionsCount = this.subscriptionsCount + 1
@@ -206,11 +206,18 @@ export class Client extends watchman.Client {
     this.subscriptionsCount = this.subscriptionsCount - 1
 
     if (this.subscriptionsCount <= 0) {
-      this.removeAllListeners()
-      this.end()
-
-      clientInstances.delete(this.watchmanBinaryPath ? this.watchmanBinaryPath : 'default')
+      this.close()
     }
+  }
+
+  /**
+   * Closes the Watchman client and removes it from known instances.
+   */
+  public close(): void {
+    this.removeAllListeners()
+    this.end()
+
+    clientInstances.delete(this.watchmanBinaryPath ? this.watchmanBinaryPath : 'default')
   }
 }
 
@@ -223,12 +230,12 @@ export class Client extends watchman.Client {
 export const getClientInstance = (watchmanBinaryPath?: string): Client => {
   const clientKey = watchmanBinaryPath ? watchmanBinaryPath : 'default'
 
-  if (clientInstances[clientKey]) {
-    return clientInstances[clientKey]
+  if (clientInstances.has(clientKey)) {
+    return clientInstances.get(clientKey)
   }
 
   const clientInstance = new Client(watchmanBinaryPath ? { watchmanBinaryPath } : {})
-  clientInstances[clientKey] = clientInstance
+  clientInstances.set(clientKey, clientInstance)
 
   return clientInstance
 }

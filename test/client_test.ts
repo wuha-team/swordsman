@@ -167,11 +167,10 @@ describe('client', () => {
 
     describe('subscriptionDeleted', () => {
 
-      beforeEach('create sandbox, stub removeAllListeners and end', () => {
+      beforeEach('create sandbox and stub close', () => {
         this.sandbox = createSandbox()
 
-        this.sandbox.stub(this.clientInstance, 'removeAllListeners')
-        this.sandbox.stub(this.clientInstance, 'end')
+        this.sandbox.stub(this.clientInstance, 'close')
       })
 
       afterEach('restore sandbox', () => {
@@ -186,20 +185,40 @@ describe('client', () => {
         expect(this.clientInstance.subscriptionsCount).to.equal(9)
       })
 
-      it('should remove listeners and end client if subscriptionsCount is zero', () => {
+      it('should close client if subscriptionsCount is zero', () => {
         this.clientInstance.subscriptionDeleted()
 
-        expect(this.clientInstance.removeAllListeners.called).to.be.true
-        expect(this.clientInstance.end.called).to.be.true
+        expect(this.clientInstance.close.called).to.be.true
       })
 
-      it('should not remove listeners and end client if subscriptionsCount is greater than zero', () => {
+      it('should not close client if subscriptionsCount is greater than zero', () => {
         this.clientInstance.subscriptionsCount = 10
 
         this.clientInstance.subscriptionDeleted()
 
-        expect(this.clientInstance.removeAllListeners.called).to.be.false
-        expect(this.clientInstance.end.called).to.be.false
+        expect(this.clientInstance.close.called).to.be.false
+      })
+
+    })
+
+    describe('close', () => {
+
+      beforeEach('create sandbox, stub removeAllListeners and end', () => {
+        this.sandbox = createSandbox()
+
+        this.sandbox.stub(this.clientInstance, 'removeAllListeners')
+        this.sandbox.stub(this.clientInstance, 'end')
+      })
+
+      afterEach('restore sandbox', () => {
+        this.sandbox.restore()
+      })
+
+      it('should call removeAllListeners and end', () => {
+        this.clientInstance.close()
+
+        expect(this.clientInstance.removeAllListeners.called).to.be.true
+        expect(this.clientInstance.end.called).to.be.true
       })
 
     })

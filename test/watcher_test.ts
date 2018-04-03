@@ -110,6 +110,7 @@ describe('watcher', () => {
       this.sandbox.stub(client, 'getClientInstance').returns({
         capabilityCheck: this.sandbox.stub().callsFake((_options, callback) => callback('error')),
         on: this.sandbox.stub(),
+        close: this.sandbox.stub(),
       })
 
       // Our test watcher factory abstracts the initialization with a promise
@@ -121,6 +122,7 @@ describe('watcher', () => {
       this.sandbox.stub(client, 'getClientInstance').returns({
         capabilityCheck: this.sandbox.stub().throws(),
         on: this.sandbox.stub(),
+        close: this.sandbox.stub(),
       })
 
       // Our test watcher factory abstracts the initialization with a promise

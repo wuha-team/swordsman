@@ -2,7 +2,7 @@
 import { expect } from 'chai'
 import * as watchman from 'fb-watchman'
 import * as fs from 'fs'
-import { createSandbox } from 'sinon'
+import { createSandbox, SinonSpy, SinonStub } from 'sinon'
 import * as tmp from 'tmp'
 
 import { createWatcher } from './_factories/_watcher'
@@ -148,7 +148,19 @@ describe('watcher', () => {
 
         await watcherInstance.close()
 
-        expect(watcherInstance.subscription.unsubscribe.called).to.be.true
+        expect((<SinonSpy> watcherInstance.subscription.unsubscribe).called).to.be.true
+      })
+
+      it('should rejects if something goes wrong when unsubscribing', async () => {
+        const watcherInstance = await createWatcher(this.dirPath)
+
+        const unsubscribeStub: SinonStub = this.sandbox.stub(watcherInstance.subscription, 'unsubscribe').rejects()
+
+        expect(watcherInstance.close()).to.eventually.be.rejected
+
+        // Restore and close to allow a graceful exit
+        unsubscribeStub.restore()
+        await watcherInstance.close()
       })
 
     })

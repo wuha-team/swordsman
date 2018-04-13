@@ -76,11 +76,7 @@ export class Watcher extends EventEmitter {
    * @returns Close operation.
    */
   public async close(): Promise<void> {
-    try {
-      await this.subscription.unsubscribe()
-    } catch (error) {
-      this.emit(WatcherEvent.ERROR, error.message)
-    }
+    return this.subscription.unsubscribe()
   }
 
   private async initiateWatch(): Promise<void> {

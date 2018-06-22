@@ -2,16 +2,16 @@
   "name": "swordsman",
   "version": "0.1.4",
   "description": "Sharp file watch interface for Facebook Watchman",
-  "author": "François Voron",
+  "author": "Wuha",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/frankie567/swordsman.git"
+    "url": "https://github.com/wuha-team/swordsman"
   },
   "bugs": {
-    "url": "https://github.com/frankie567/swordsman/issues"
+    "url": "https://github.com/wuha-team/swordsman/issues"
   },
-  "homepage": "https://github.com/frankie567/swordsman#readme",
+  "homepage": "https://github.com/wuha-team/swordsman#readme",
   "engineStrict": true,
   "engines": {
     "node": ">= 8.9.0"
